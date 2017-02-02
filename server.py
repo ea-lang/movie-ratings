@@ -57,14 +57,22 @@ def process_login_form():
         flash("Email not found")
         return redirect("/login")
 
-    # if user found, chekc if password matches
+    # if user found, check if password matches
     if password == user_check.password:
         session['user_id'] = user_check.user_id
         flash("Logged in successfully")
-        return render_template("homepage.html")
+        route = "/userpage/" + str(user_check.user_id)
+        return redirect(route)
     else:
         flash("Wrong password!")
         return render_template("login_form.html")
+
+
+@app.route('/logout')
+def logout():
+    del session['user_id']
+    flash("Logged out successfully")
+    return redirect("/")
 
 
 @app.route('/register', methods=["GET"])
@@ -78,25 +86,54 @@ def process_register_form():
     email = request.form.get("email")
     password = request.form.get("password")
 
-# error msg === raise orm_exc.NoResultFound("No row was found for one()")
-# sqlalchemy.orm.exc.NoResultFound: No row was found for one()
+    #Check if user already exists, if not create user and add to table
+    try:
+        user_check = User.query.filter_by(email=email).one()
+        flash("Email already registered!")
+        return render_template("register_form.html")
+    except NoResultFound:
+        user = User(email=email,
+                    password=password)
+        db.session.add(user)
+        db.session.commit()
+
+        session['user_id'] = user.user_id
+        flash("You are registered & logged in.")
+        return render_template("homepage.html")
+
+@app.route('/userpage/<user_id>')
+def display_user(user_id):
+    # user_id = request.args.get('user_id')
+
+    user_info = User.query.get(user_id)
+
+    user_ratings_objects = user_info.ratings
+
+    return render_template("user_details.html", user_info=user_info, 
+                            user_ratings_objects=user_ratings_objects)
+
+@app.route('/movielist/')
+def display_movies():
+    movies = Movie.query.all() #order....
+    return render_template("movie_list.html", movies=movies)
 
 
-    # #Check if user already exists, if not create user and add to table
-    # try:
-    #     user_check = User.query.filter_by(email=email).one()
-    # except NoResultFound:
-    #     user = User(email=email,
-    #                 password=password)
-    #     db.session.add(user)
-    #     db.session.commit()
+app.route('/moviedetails/<movie_id>')
+def display_movie(movie_id):
+
+    movie_info = Movie.query.get(movie_id)
+
+    movie_ratings_objects = movie_info.ratings
+
+    return render_template("movie_details.html", movie_info=movie_info,
+                            movie_ratings_objects=movie_ratings_objects)
 
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
     app.debug = True
-    app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
+    app.jinja_env.auto_reload = app.debug  # make sure tuser_emplates, etc. are not cached in debug mode
 
     connect_to_db(app)
 
