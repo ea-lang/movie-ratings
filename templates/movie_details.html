@@ -13,7 +13,7 @@ Link: <a href={{ movie_info.imdb_url }}> IMDB page</a> <br>
 <h1>Rate this movie</h1>
 
 <form action="/rating" method="POST">
-    <input type="text" name="movie_id" value={{ movie_info.movie_id }}>
+    <input type="hidden" name="movie_id" value={{ movie_info.movie_id }}>
     My rating:<input type="number" name="score"><br>
     <input type="submit" label="submit rating">
 </form>

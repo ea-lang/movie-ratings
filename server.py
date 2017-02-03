@@ -145,7 +145,7 @@ def process_rating():
         user_movie_check = Rating.query.filter_by(user_id=user_id,
                                                   movie_id=movie_id).one()
         user_movie_check.score = score
-        db.commit()
+        db.session.commit()
 
         flash("Your rating has been updated.")
         return redirect('/moviedetails/%s' % (movie_id))
