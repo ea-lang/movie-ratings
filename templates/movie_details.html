@@ -7,9 +7,22 @@ Title: {{ movie_info.title }} <br>
 Released: {{ movie_info.released_at }} <br>
 Link: <a href={{ movie_info.imdb_url }}> IMDB page</a> <br>
 
+
+{% if "user_id" in session %}
+
+<h1>Rate this movie</h1>
+
+<form action="/rating" method="POST">
+    <input type="text" name="movie_id" value={{ movie_info.movie_id }}>
+    My rating:<input type="number" name="score"><br>
+    <input type="submit" label="submit rating">
+</form>
+
+{% endif %}
+
 <ul>
 {% for rating in movie_ratings_objects %}
-    <li>User: {{ rating.user.user_id }}<br>SCORE: {{ rating.score }}<br><br></li>
+    <li>User: <a href="/userpage/{{ rating.user.user_id }}">{{ rating.user.user_id }}</a><br>SCORE: {{ rating.score }}<br><br></li>
 {% endfor %}
 </ul>
 

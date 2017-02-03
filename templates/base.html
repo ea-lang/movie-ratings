@@ -17,8 +17,14 @@
   <hr>
 
   {% block content %} put your content here {% endblock %}
-<form action="/logout" method="get">
-  <button type="submit" id="logout" value="Logout">Logout</button>
-</form>
+
+{% if "user_id" in session %}
+
+  <form action="/logout" method="get">
+    <button type="submit" id="logout" value="Logout">Logout</button>
+  </form>
+
+{% endif %}
+
 </body>
 </html>

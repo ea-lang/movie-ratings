@@ -53,7 +53,7 @@ def process_login_form():
 
     try:
         user_check = User.query.filter_by(email=email).one()
-    except NoResultFound: 
+    except NoResultFound:
         flash("Email not found")
         return redirect("/login")
 
@@ -109,8 +109,9 @@ def display_user(user_id):
 
     user_ratings_objects = user_info.ratings
 
-    return render_template("user_details.html", user_info=user_info, 
+    return render_template("user_details.html", user_info=user_info,
                             user_ratings_objects=user_ratings_objects)
+
 
 @app.route('/movielist/')
 def display_movies():
@@ -118,15 +119,46 @@ def display_movies():
     return render_template("movie_list.html", movies=movies)
 
 
-app.route('/moviedetails/<movie_id>')
+@app.route('/moviedetails/<movie_id>')
 def display_movie(movie_id):
 
     movie_info = Movie.query.get(movie_id)
 
     movie_ratings_objects = movie_info.ratings
 
-    return render_template("movie_details.html", movie_info=movie_info,
+    return render_template("movie_details.html",
+                            movie_info=movie_info,
                             movie_ratings_objects=movie_ratings_objects)
+
+
+@app.route('/rating', methods=["POST"])
+def process_rating():
+    user_id = session["user_id"]
+    movie_id = int(request.form.get("movie_id"))
+    score = int(request.form.get("score"))
+
+    print user_id
+    print movie_id
+    print score
+
+    try:
+        user_movie_check = Rating.query.filter_by(user_id=user_id,
+                                                  movie_id=movie_id).one()
+        user_movie_check.score = score
+        db.commit()
+
+        flash("Your rating has been updated.")
+        return redirect('/moviedetails/%s' % (movie_id))
+
+    except NoResultFound:
+        rating = Rating(user_id=user_id,
+                        movie_id=movie_id,
+                        score=score)
+        db.session.add(rating)
+        db.session.commit()
+
+        flash("Your rating has been submitted")
+        return redirect('/moviedetails/%s' % (movie_id))
 
 
 if __name__ == "__main__":
